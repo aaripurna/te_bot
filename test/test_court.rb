@@ -59,8 +59,10 @@ class TestCourt < Minitest::Test
       reply(conn, "This IS Bot")
     end
 
-    def talk_back(message)
-      @boo = :boo
+    class << self
+      def talk_back(message)
+        @boo = :boo
+      end
     end
   end
 
