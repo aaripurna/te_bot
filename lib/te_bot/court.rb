@@ -37,7 +37,7 @@ module TeBot
           end
 
           def default_action
-            class_variable_get(:@@default_action)&.call
+            class_variable_get(:@@default_action)
           end
         end
       end
