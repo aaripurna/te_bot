@@ -33,7 +33,7 @@ module TeBot
           end
 
           def invalid_command(&block)
-            class_variable_set(:@@default_action, &block)
+            class_variable_set(:@@default_action, block)
           end
 
           def default_action
