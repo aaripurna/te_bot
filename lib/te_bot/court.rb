@@ -2,7 +2,6 @@
 
 require "rack"
 require "json"
-require "byebug"
 
 module TeBot
   class Court
