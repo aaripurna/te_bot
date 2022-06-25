@@ -6,6 +6,7 @@ module TeBot
   class Court
     def self.inherited(subclass)
       subclass.class_variable_set(:@@mapper, ::TeBot::Mapper.new)
+      subclass.class_variable_set(:@@wire, nil)
 
       subclass.class_eval do
         class << self
@@ -22,7 +23,16 @@ module TeBot
           end
 
           def access_token(token)
-            define_method(:access_token) { token }
+            wire = class_variable_get(:@@wire)
+
+            define_method(:wire) do
+
+              return wire if wire
+
+              wire = self.class.class_variable_set(:@@wire, ::TeBot::Wire.new(token))
+
+              wire
+            end
           end
         end
       end
@@ -41,12 +51,16 @@ module TeBot
       [200, { 'Content-Type' => 'application/json'}, [JSON.generate({'message' => 'success'})]]
     end
 
+    def reply(conn, message)
+      send_message(chat_id(conn), message)
+    end
+
     def chat_id(conn)
       conn.dig('message', 'chat', 'id')
     end
 
     def send_message(chat_id, message)
-      
+      wire.send_message(chat_id, message)
     end
   end
 end
