@@ -51,11 +51,11 @@ class TestCourt < Minitest::Test
       params
     end
 
-    map("/boo") do |params, message|
-      talk_back(message)
+    map("/boo") do |conn, params|
+      talk_back(conn)
     end
 
-    map("/foo") do |params, conn|
+    map("/foo") do |conn, params|
       reply(conn, "This IS Bot")
     end
 

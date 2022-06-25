@@ -11,12 +11,12 @@ module TeBot
       self
     end
 
-    def call(text, opts = nil)
+    def call(text)
       command, params = ::TeBot::Command.new(text).parse
 
       handler = @commands[command]
 
-      handler.call(params, opts) if handler.respond_to?(:call)
+      [handler, params] if handler.respond_to?(:call) && params
     end
   end
 end

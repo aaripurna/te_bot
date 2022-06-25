@@ -8,6 +8,7 @@ module TeBot
     def self.inherited(subclass)
       subclass.class_variable_set(:@@mapper, ::TeBot::Mapper.new)
       subclass.class_variable_set(:@@wire, nil)
+      subclass.class_variable_set(:@@default_action, nil)
 
       subclass.class_eval do
         class << self
@@ -29,6 +30,14 @@ module TeBot
 
           def wire
             class_variable_get(:@@wire)
+          end
+
+          def invalid_command(&block)
+            subclass.class_variable_set(:@@default_action, &block)
+          end
+
+          def default_action
+            class_variable_get(:@@default_action)&.call
           end
         end
       end
@@ -53,7 +62,13 @@ module TeBot
       body = JSON.parse(req.body.read)
       command = body.dig("message", "text")
 
-      self.class.mapper.call(command, body)
+      handler, params = self.class.mapper.call(command)
+
+      if handler.respond_to?(:call)
+        handler.call(body, params)
+      elsif self.class.default_action.respond_to?(:call)
+        self.class.default_action.call(body, params)
+      end
 
       [200, {"Content-Type" => "application/json"}, [JSON.generate({"message" => "success"})]]
     end
