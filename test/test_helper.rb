@@ -5,4 +5,4 @@ require "te_bot"
 
 require "minitest/autorun"
 
-require 'webmock/minitest'
+require "webmock/minitest"

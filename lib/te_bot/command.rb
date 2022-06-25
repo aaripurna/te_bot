@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module TeBot
   class Command
     def initialize(text)
@@ -8,7 +9,7 @@ module TeBot
     def parse
       [extract_command, extract_params]
     end
-    
+
     private
 
     def extract_command
@@ -18,11 +19,9 @@ module TeBot
     end
 
     def extract_params
-      @text.scan(/\S+\:\S+/).inject({}) do |memo, query|
-        key, value = query.split(':')
+      @text.scan(/\S+:\S+/).each_with_object({}) do |query, memo|
+        key, value = query.split(":")
         memo[key] = value
-
-        memo
       end
     end
   end

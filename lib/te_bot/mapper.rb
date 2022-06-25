@@ -15,7 +15,7 @@ module TeBot
       command, params = ::TeBot::Command.new(text).parse
 
       handler = @commands[command]
-      
+
       handler.call(params, opts) if handler.respond_to?(:call)
     end
   end

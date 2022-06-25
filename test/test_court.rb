@@ -11,13 +11,14 @@ class TestCourt < Minitest::Test
     stub_request(:post, "https://api.telegram.org/bot5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A/sendMessage?chat_id=5093621143&text=This IS Bot")
       .with(
         headers: {
-        'Accept'=>'*/*',
-        'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'Content-Length'=>'0',
-        'Content-Type'=>'application/json',
-        'User-Agent'=>'Faraday v2.3.0'
-      })
-      .to_return(status: 200, body: %Q(
+          "Accept" => "*/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Content-Length" => "0",
+          "Content-Type" => "application/json",
+          "User-Agent" => "Faraday v2.3.0"
+        }
+      )
+      .to_return(status: 200, body: %(
         {
             "ok": true,
             "result": {
@@ -46,15 +47,15 @@ class TestCourt < Minitest::Test
     access_token "5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A"
     attr_reader :boo
 
-    map('/start limit:10 not:10') do |params, message|
+    map("/start limit:10 not:10") do |params, message|
       params
     end
 
-    map('/boo') do |params, message|
+    map("/boo") do |params, message|
       talk_back(message)
     end
 
-    map('/foo') do |params, conn|
+    map("/foo") do |params, conn|
       reply(conn, "This IS Bot")
     end
 
@@ -64,7 +65,7 @@ class TestCourt < Minitest::Test
   end
 
   BOO = Class.new(::TeBot::Court) do
-    map('/whoami limit:10 not:10') do |params, message|
+    map("/whoami limit:10 not:10") do |params, message|
       params
     end
   end
@@ -78,70 +79,73 @@ class TestCourt < Minitest::Test
   end
 
   def test_it_returns_params
-    post '/', JSON.generate({
-      "update_id":10000,
-      "message":{
-        "date":1441645532,
-        "chat":{
-          "last_name":"Test Lastname",
-          "id":1111111,
-          "first_name":"Test",
-          "username":"Test"
+    post "/", JSON.generate({
+      update_id: 10000,
+      message: {
+        date: 1441645532,
+        chat: {
+          last_name: "Test Lastname",
+          id: 1111111,
+          first_name: "Test",
+          username: "Test"
         },
-        "message_id":1365,
-        "from":{
-          "last_name":"Test Lastname",
-          "id":1111111,
-          "first_name":"Test",
-          "username":"Test"
+        message_id: 1365,
+        from: {
+          last_name: "Test Lastname",
+          id: 1111111,
+          first_name: "Test",
+          username: "Test"
         },
-        "text":"/start"
-        }})
+        text: "/start"
+      }
+    })
   end
 
   def test_it_fallback_to_caller_method
-    post '/', JSON.generate({
-      "update_id":10000,
-      "message":{
-        "date":1441645532,
-        "chat":{
-          "last_name":"Test Lastname",
-          "id":1111111,
-          "first_name":"Test",
-          "username":"Test"
+    post "/", JSON.generate({
+      update_id: 10000,
+      message: {
+        date: 1441645532,
+        chat: {
+          last_name: "Test Lastname",
+          id: 1111111,
+          first_name: "Test",
+          username: "Test"
         },
-        "message_id":1365,
-        "from":{
-          "last_name":"Test Lastname",
-          "id":1111111,
-          "first_name":"Test",
-          "username":"Test"
+        message_id: 1365,
+        from: {
+          last_name: "Test Lastname",
+          id: 1111111,
+          first_name: "Test",
+          username: "Test"
         },
-        "text":"/boo"
-      }})
+        text: "/boo"
+      }
+    })
   end
 
   def test_it_can_send_message
-    response = post '/', JSON.generate({
-      "update_id":10000,
-      "message":{
-        "date":1441645532,
-        "chat":{
-          "last_name":"Test Lastname",
-          "id":5093621143,
-          "first_name":"Test",
-          "username":"Test"
+    response = post "/", JSON.generate({
+      update_id: 10000,
+      message: {
+        date: 1441645532,
+        chat: {
+          last_name: "Test Lastname",
+          id: 5093621143,
+          first_name: "Test",
+          username: "Test"
         },
-        "message_id":1365,
-        "from":{
-          "last_name":"Test Lastname",
-          "id":5093621143,
-          "first_name":"Test",
-          "username":"Test"
+        message_id: 1365,
+        from: {
+          last_name: "Test Lastname",
+          id: 5093621143,
+          first_name: "Test",
+          username: "Test"
         },
-        "text":"/foo"
-      }})
-    
+        text: "/foo"
+      }
+    })
+
     assert_equal response.status, 200
   end
 end

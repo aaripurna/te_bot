@@ -1,6 +1,7 @@
 # frozen_string_literal: true
-require 'rack'
-require 'json'
+
+require "rack"
+require "json"
 
 module TeBot
   class Court
@@ -26,7 +27,6 @@ module TeBot
             wire = class_variable_get(:@@wire)
 
             define_method(:wire) do
-
               return wire if wire
 
               wire = self.class.class_variable_set(:@@wire, ::TeBot::Wire.new(token))
@@ -41,14 +41,14 @@ module TeBot
     def call(env)
       req = Rack::Request.new(env)
       body = JSON.parse(req.body.read)
-      command = body.dig('message', 'text')
+      command = body.dig("message", "text")
       begin
         self.class.mapper.call(command, body)
       rescue NoMethodError => e
-        self.send(e.name, *e.args)
+        send(e.name, *e.args)
       end
 
-      [200, { 'Content-Type' => 'application/json'}, [JSON.generate({'message' => 'success'})]]
+      [200, {"Content-Type" => "application/json"}, [JSON.generate({"message" => "success"})]]
     end
 
     def reply(conn, message)
@@ -56,7 +56,7 @@ module TeBot
     end
 
     def chat_id(conn)
-      conn.dig('message', 'chat', 'id')
+      conn.dig("message", "chat", "id")
     end
 
     def send_message(chat_id, message)

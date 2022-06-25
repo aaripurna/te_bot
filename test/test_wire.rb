@@ -3,18 +3,19 @@
 require "test_helper"
 
 class TestWire < Minitest::Test
-  ACCESS_TOKEN = '5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A'
+  ACCESS_TOKEN = "5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A"
   def setup
     stub_request(:post, "https://api.telegram.org/bot#{ACCESS_TOKEN}/sendMessage?chat_id=5093621143&text=This IS Bot")
       .with(
         headers: {
-        'Accept'=>'*/*',
-        'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'Content-Length'=>'0',
-        'Content-Type'=>'application/json',
-        'User-Agent'=>'Faraday v2.3.0'
-      })
-      .to_return(status: 200, body: %Q(
+          "Accept" => "*/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Content-Length" => "0",
+          "Content-Type" => "application/json",
+          "User-Agent" => "Faraday v2.3.0"
+        }
+      )
+      .to_return(status: 200, body: %(
         {
             "ok": true,
             "result": {
@@ -41,10 +42,10 @@ class TestWire < Minitest::Test
 
   def test_it_send_message
     service = ::TeBot::Wire.new(ACCESS_TOKEN)
-    response = service.send_message(5093621143, 'This IS Bot')
+    response = service.send_message(5093621143, "This IS Bot")
 
     assert_equal response.status, 200
-    assert_equal response.body, %Q(
+    assert_equal response.body, %(
         {
             "ok": true,
             "result": {
