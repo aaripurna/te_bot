@@ -2,9 +2,9 @@
 
 [![Gem Version](https://badge.fury.io/rb/te_bot.svg)](https://badge.fury.io/rb/te_bot) ![Main Workflows](https://github.com/aaripurna/te_bot/actions/workflows/main.yml/badge.svg)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/te_bot`. To experiment with that code, run `bin/console` for an interactive prompt.
+Welcome to yet another telegram bot webhook handler.
 
-This gem is used to handle telegram webhook and sending message with telegram bot
+This gem is used to handle telegram webhook and sending message with telegram bot.
 
 ## Installation
 
