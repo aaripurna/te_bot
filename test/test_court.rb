@@ -81,7 +81,7 @@ class TestCourt < Minitest::Test
   end
 
   def test_it_returns_params
-    post "/", JSON.generate({
+    response = post "/", JSON.generate({
       update_id: 10000,
       message: {
         date: 1441645532,
@@ -100,11 +100,13 @@ class TestCourt < Minitest::Test
         },
         text: "/start"
       }
-    })
+    }), {"CONTENT_TYPE" => "application/json"}
+
+    assert_equal response.status, 200
   end
 
   def test_it_fallback_to_caller_method
-    post "/", JSON.generate({
+    response = post "/", JSON.generate({
       update_id: 10000,
       message: {
         date: 1441645532,
@@ -123,7 +125,9 @@ class TestCourt < Minitest::Test
         },
         text: "/boo"
       }
-    })
+    }), {"CONTENT_TYPE" => "application/json"}
+
+    assert_equal response.status, 200
   end
 
   def test_it_can_send_message
@@ -146,7 +150,7 @@ class TestCourt < Minitest::Test
         },
         text: "/foo"
       }
-    })
+    }), {"CONTENT_TYPE" => "application/json"}
 
     assert_equal response.status, 200
   end

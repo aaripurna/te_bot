@@ -7,6 +7,7 @@ module TeBot
   autoload :Mapper, "te_bot/mapper.rb"
   autoload :Court, "te_bot/court.rb"
   autoload :Wire, "te_bot/wire.rb"
+  autoload :Message, "te_bot/message.rb"
 
   class Error < StandardError; end
   # Your code goes here...
