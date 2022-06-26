@@ -2,8 +2,11 @@
 
 module TeBot
   class Message
+    GENERAL_MESSAGE_TYPES = %i[text query document audio voice]
+    MESSAGE_TYPES = %I[command text query document audio voice]
+
     def initialize(body)
-      data = body.dig("message") || body.dig("edit_date") ||
+      data = body.dig("message") || body.dig("edited_message") ||
         body.dig("inline_query") || body.dig("chosen_inline_result") ||
         body.dig("chosen_inline_result")
 
@@ -14,7 +17,7 @@ module TeBot
       @message
     end
 
-    %I[command text query document audio voice].each do |format|
+    MESSAGE_TYPES.each do |format|
       define_method(format) do |&block|
         instance_variable_set("@#{format}", block)
       end

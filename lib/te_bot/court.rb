@@ -29,7 +29,7 @@ module TeBot
         @commands[text] = block
       end
 
-      %I[audio video text voice query document].each do |m|
+      ::TeBot::Message::GENERAL_MESSAGE_TYPES.each do |m|
         define_method(m) do |&block|
           instance_variable_get("@#{m}") || instance_variable_set("@#{m}", block)
           instance_variable_get("@#{m}")
@@ -74,6 +74,15 @@ module TeBot
           handler.call(message, params)
         elsif self.class.default_action.respond_to?(:call)
           self.class.default_action(message, params)
+        end
+      end
+
+      ::TeBot::Message::GENERAL_MESSAGE_TYPES.each do |f|
+        message.public_send(f) do
+          handler = self.class.public_send(f)
+
+          next unless handler.respond_to?(:call)
+          handler.call(message)
         end
       end
 

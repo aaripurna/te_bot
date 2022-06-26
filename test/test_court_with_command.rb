@@ -16,10 +16,6 @@ class TestCourtWithCommand < Minitest::Test
       params
     end
 
-    video do |params|
-      params
-    end
-
     text do |params|
       params
     end
@@ -45,10 +41,6 @@ class TestCourtWithCommand < Minitest::Test
 
   def test_audio_macro
     assert_equal Controller.audio.call({size: 200, file: "thefile.mp3"}), {size: 200, file: "thefile.mp3"}
-  end
-
-  def test_video_macro
-    assert_equal Controller.audio.call({size: 30000, file: "thefile.mp4"}), {size: 30000, file: "thefile.mp4"}
   end
 
   def test_text_macro
