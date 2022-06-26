@@ -47,15 +47,15 @@ class TestCourt < Minitest::Test
     access_token "5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A"
     attr_reader :boo
 
-    map("/start limit:10 not:10") do |params, message|
+    command("/start limit:10 not:10") do |params, message|
       params
     end
 
-    map("/boo") do |conn, params|
+    command("/boo") do |conn, params|
       talk_back(conn)
     end
 
-    map("/foo") do |conn, params|
+    command("/foo") do |conn, params|
       reply(conn, "This IS Bot")
     end
 
@@ -67,7 +67,7 @@ class TestCourt < Minitest::Test
   end
 
   BOO = Class.new(::TeBot::Court) do
-    map("/whoami limit:10 not:10") do |params, message|
+    command("/whoami limit:10 not:10") do |params, message|
       params
     end
   end
@@ -77,7 +77,7 @@ class TestCourt < Minitest::Test
   end
 
   def test_it_dont_mix
-    refute_equal Controller.mapper, BOO.mapper
+    refute_equal Controller.commands, BOO.commands
   end
 
   def test_it_returns_params

@@ -6,15 +6,10 @@ require "json"
 module TeBot
   class Court
     class << self
-      attr_reader :wire, :mapper, :default_action, :commands
+      attr_reader :wire, :default_action, :commands
 
       def access_token(token)
         @wire = ::TeBot::Wire.new(token)
-      end
-
-      def map(text, &block)
-        @mapper ||= ::TeBot::Mapper.new
-        @mapper.map(text, &block)
       end
 
       def invalid_command(&block)
@@ -22,34 +17,36 @@ module TeBot
       end
 
       def reply(conn, message)
-        send_message(chat_id(conn), message)
-      end
-
-      def chat_id(conn)
-        conn.dig("message", "chat", "id")
+        send_message(conn.data&.chat_id, message)
       end
 
       def send_message(chat_id, message)
         wire.send_message(chat_id, message)
       end
-      
+
       def command(text, &block)
         @commands ||= {}
+        @commands[text] = block
+      end
+
+      %I[audio video text voice query document].each do |m|
+        define_method(m) do |&block|
+          instance_variable_get("@#{m}") || instance_variable_set("@#{m}", block)
+          instance_variable_get("@#{m}")
+        end
       end
     end
 
     def call(env)
       json_only(env) do |body|
-        command = body.dig("message", "text")
-        handler, params = self.class.mapper.call(command)
+        response = handle_request(body)
 
-        if handler.respond_to?(:call)
-          handler.call(body, params)
-        elsif self.class.default_action.respond_to?(:call)
-          self.class.default_action.call(body, params)
+        if response.is_a?(Array)
+          status, headers, body = response
+          [status, headers, body]
+        else
+          [200, {"Content-Type" => "application/json"}, [JSON.generate({"message" => "success"})]]
         end
-
-        [200, {"Content-Type" => "application/json"}, [JSON.generate({"message" => "success"})]]
       end
     end
 
@@ -68,6 +65,19 @@ module TeBot
 
     def handle_request(body)
       message = ::TeBot::Message.new(body)
+
+      message.command do
+        command, params = message.data.content.parse
+        handler = self.class.commands[command]
+
+        if handler.respond_to?(:call)
+          handler.call(message, params)
+        elsif self.class.default_action.respond_to?(:call)
+          self.class.default_action(message, params)
+        end
+      end
+
+      message.call
     end
   end
 end

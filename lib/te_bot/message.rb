@@ -22,7 +22,7 @@ module TeBot
 
     def call
       return unless data || data.content
-      content_class = data.content.class.name.split('::').last.downcase
+      content_class = data.content.class.name.split("::").last.downcase
 
       return unless instance_variable_get("@#{content_class}")
 
@@ -31,7 +31,7 @@ module TeBot
 
     class Format
       attr_reader :date, :chat, :message_id, :from, :forward_from,
-        :forward_date, :reply_to_message, :content, :edit_date
+        :forward_date, :reply_to_message, :content, :edit_date, :chat_id
 
       def initialize(message = {})
         @date = message.dig("date")
@@ -42,6 +42,7 @@ module TeBot
         @forward_date = message.dig("forward_date")
         @edit_date = message.dig("edit_date")
         @content = extract_content(message)
+        @chat_id = @chat&.dig("id")
 
         @reply_to_message = message.dig("reply_to_message")
       end

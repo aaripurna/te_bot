@@ -33,7 +33,7 @@ class TestMessage < Minitest::Test
     })
 
     assert_instance_of ::TeBot::Message::Audio, message.data.content
-    
+
     message.audio do
       10
     end
