@@ -8,7 +8,7 @@ module TeBot
     def initialize(body)
       data = body.dig("message") || body.dig("edited_message") ||
         body.dig("inline_query") || body.dig("chosen_inline_result") ||
-        body.dig("chosen_inline_result")
+        body.dig("chosen_inline_result") || {}
 
       @message = Format.new(data)
     end

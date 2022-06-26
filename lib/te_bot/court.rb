@@ -53,14 +53,18 @@ module TeBot
     private
 
     def json_only(env)
-      unless env["CONTENT_TYPE"].start_with?("application/json")
+      unless env["CONTENT_TYPE"]&.start_with?("application/json")
         return [400, {"Content-Type" => "application/json"}, [JSON.generate({"message" => "only accepting application/json"})]]
       end
 
       req = Rack::Request.new(env)
-      body = JSON.parse(req.body.read)
+      body = req.body.read
 
-      yield(body)
+      return [400, {"Content-Type" => "application/json"}, [JSON.generate({"message" => "Body is required"})]] if body.nil? || body.empty?
+
+      data = JSON.parse(body)
+
+      yield(data)
     end
 
     def handle_request(body)
