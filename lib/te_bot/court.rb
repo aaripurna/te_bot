@@ -6,14 +6,18 @@ require "json"
 module TeBot
   class Court
     class << self
-      attr_reader :wire, :default_action, :commands
+      attr_reader :wire, :commands
 
       def access_token(token)
         @wire = ::TeBot::Wire.new(token)
       end
 
-      def invalid_command(&block)
-        @default_action = block
+      def default_command(&block)
+        @default_command ||= block
+      end
+
+      def default_action(&block)
+        @default_action ||= block
       end
 
       def reply(conn, message)
@@ -76,8 +80,8 @@ module TeBot
 
         if handler.respond_to?(:call)
           handler.call(message, params)
-        elsif self.class.default_action.respond_to?(:call)
-          self.class.default_action(message, params)
+        elsif self.class.default_command.respond_to?(:call)
+          self.class.default_command.call(message, params)
         end
       end
 
@@ -90,7 +94,11 @@ module TeBot
         end
       end
 
-      message.call
+      if message.handler.respond_to?(:call)
+        message.call
+      elsif self.class.default_action.respond_to?(:call)
+        self.class.default_action.call(message)
+      end
     end
   end
 end

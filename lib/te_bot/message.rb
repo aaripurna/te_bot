@@ -23,13 +23,15 @@ module TeBot
       end
     end
 
-    def call
+    def handler
       return unless data || data.content
       content_class = data.content.class.name.split("::").last.downcase
 
-      return unless instance_variable_get("@#{content_class}")
+      instance_variable_get("@#{content_class}")
+    end
 
-      instance_variable_get("@#{content_class}").call
+    def call
+      handler&.call
     end
 
     class Format

@@ -31,6 +31,14 @@ class TestGeneralMessage < Minitest::Test
     text do |conn|
       [200, {"Contet-Type" => "application/json"}, [%({"Hello": "#{conn.data.content.parse}"})]]
     end
+
+    default_action do |message|
+      [200, {"Contet-Type" => "application/json"}, [%({"Hello": "Tis is the default message"})]]
+    end
+
+    default_command do |conn, params|
+      [200, {"Contet-Type" => "application/json"}, [%({"Hello": "Sorry, command not found"})]]
+    end
   end
 
   def app
@@ -207,5 +215,39 @@ class TestGeneralMessage < Minitest::Test
 
     assert_equal 200, response.status
     assert_equal({"Hello" => "Mantap nggak tuh"}, JSON.parse(response.body))
+  end
+
+  def test_default_message
+    response = post("/", JSON.generate({"hello" => "World"}), {"CONTENT_TYPE" => "application/json"})
+
+    assert_equal 200, response.status
+    assert_equal({"Hello" => "Tis is the default message"}, JSON.parse(response.body))
+  end
+
+  def test_default_command
+    response = post("/", JSON.generate({
+      "update_id" => 10000,
+      "message" => {
+        "date" => 1441645532,
+        "chat" => {
+          "last_name" => "Test Lastname",
+          "id" => 1111111,
+          "type" => "private",
+          "first_name" => "Test Firstname",
+          "username" => "Testusername"
+        },
+        "message_id" => 1365,
+        "from" => {
+          "last_name" => "Test Lastname",
+          "id" => 1111111,
+          "first_name" => "Test Firstname",
+          "username" => "Testusername"
+        },
+        "text" => "/moo"
+      }
+    }), {"CONTENT_TYPE" => "application/json"})
+
+    assert_equal 200, response.status
+    assert_equal({"Hello" => "Sorry, command not found"}, JSON.parse(response.body))
   end
 end
