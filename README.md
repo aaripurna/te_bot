@@ -1,5 +1,7 @@
 # ::TeBot
 
+[![Gem Version](https://badge.fury.io/rb/te_bot.svg)](https://badge.fury.io/rb/te_bot) ![Main Workflows](https://github.com/aaripurna/te_bot/actions/workflows/main.yml/badge.svg)
+
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/te_bot`. To experiment with that code, run `bin/console` for an interactive prompt.
 
 This gem is used to handle telegram webhook and sending message with telegram bot
@@ -8,14 +10,15 @@ This gem is used to handle telegram webhook and sending message with telegram bo
 
 Install the gem and add to the application's Gemfile
 
-    gem "te_bot", github: "aaripurna/te_bot"
+    gem 'te_bot', '~> 0.1.0'
+
 Then run
 
-    $ bundle install
+    bundle install    
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
-    $ gem install te_bot -l https://github.com/aaripurna/te_bot.git
+    gem install te_bot
 
 ## Usage
 
@@ -27,21 +30,22 @@ This gem can be used as a standalone app since it implement rack interface. To u
 require "te_bot"
 
 class MyWebhookApp < TeBot::Court
-    access_token ENV["YOUR_BOT_ACCESS_TOKEN"]
+  access_token ENV["YOUR_BOT_ACCESS_TOKEN"]
     
-    command("/start") do |conn, params|
-        reply(conn, "Welcome aboard my friend!")
-    end
+  command("/start") do |conn, params|
+    reply(conn, "Welcome aboard my friend!")
+  end
     
-    command("/today") do |conn, params|
-        reply(conn, Time.now.to_s)
-    end
+  command("/today") do |conn, params|
+    reply(conn, Time.now.to_s)
+  end
 end
 ```
 
 To run this as a standalone app, you need to install `rack` and a webserver such as `puma`
 
-    $ bundle add rack puma
+    bundle add rack puma
+
 create a file named `config.ru` as the rack entrypoint.
 
 ```rb
@@ -53,7 +57,7 @@ run MyWebhookApp.new
 ```
 To run the app we can use rackup
 
-    $ bundle exec rackup
+    bundle exec rackup
 
 For more detailed information about rack please visit [Rack Repository](https://github.com/rack/rack).
 
@@ -66,9 +70,9 @@ To add a default handler for non existing command we can use the `#default_comma
 # app.rb
 
 class MyWebhookApp < TeBot::Court
-    default_command do |conn, params|
-        reply(conn, "Sorry, Comand not found. Try another command. or type /help")
-    end
+  default_command do |conn, params|
+    reply(conn, "Sorry, Comand not found. Try another command. or type /help")
+  end
 end
 ```
 
@@ -78,10 +82,10 @@ Other type of messages are also supported by using this macros `text` for regula
 # app.rb
 
 class MyWebhookApp < TeBot::Court
-    text do |conn|
-        message = do_some_fancy_stuff_here(conn)
-        reply(conn, message)
-    end
+  text do |conn|
+    message = do_some_fancy_stuff_here(conn)
+    reply(conn, message)
+  end
 end
 ```
 And also we can define a macro for defaul action `#default_action` if the request does not match with this [Documentation](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates), Or we have not create the handler for that specific message type. Just becarefull, the `conn.data` might returns nil if the message format doesnot match the documentation.
@@ -90,9 +94,9 @@ And also we can define a macro for defaul action `#default_action` if the reques
 # app.rb
 
 class MyWebhookApp < TeBot::Court
-    default_action do |conn|
-        reply(conn, "No, I can't talk like people. use command instead") if conn.data&.chat_id
-    end
+  default_action do |conn|
+    reply(conn, "No, I can't talk like people. use command instead") if conn.data&.chat_id
+  end
 end
 ```
 Since this app implements rack interface, and railr is also a rack based application. We can mount this app direcly inside rails app.
@@ -103,7 +107,7 @@ Since this app implements rack interface, and railr is also a rack based applica
 require "lib/to/your_webhook"
 
 Rails.application.routes.draw do
-    mount MyAwessomWebhook.new => "telegram_webhook"
+  mount MyAwessomWebhook.new => "telegram_webhook"
 end
 ```
 
