@@ -17,17 +17,17 @@ module TeBot
       @message
     end
 
-    MESSAGE_TYPES.each do |format|
-      define_method(format) do |&block|
-        instance_variable_set("@#{format}", block)
+    MESSAGE_TYPES.each do |f|
+      define_method(f) do |&block|
+        @formats ||= {}
+        @formats[f.to_s] = block
       end
     end
 
     def handler
       return unless data || data.content
       content_class = data.content.class.name.split("::").last.downcase
-
-      instance_variable_get("@#{content_class}")
+      @formats[content_class]
     end
 
     def call

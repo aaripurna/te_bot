@@ -27,9 +27,19 @@ module TeBot
 
       ::TeBot::Message::GENERAL_MESSAGE_TYPES.each do |m|
         define_method(m) do |&block|
-          instance_variable_get("@#{m}") || instance_variable_set("@#{m}", block)
-          instance_variable_get("@#{m}")
+          @message_handlers ||= {}
+
+          if block.respond_to?(:call)
+            @message_handlers[m] = block
+          else
+            @message_handlers[m]
+          end
         end
+      end
+
+      def message_handlers(handler)
+        @message_handlers ||= {}
+        @message_handlers[handler]
       end
     end
 
@@ -37,9 +47,11 @@ module TeBot
       json_only(env) do |body|
         response = handle_request(body)
 
-        if response.is_a?(Array)
-          status, headers, body = response
-          [status, headers, body]
+        case response
+        in [Integer, Hash, Array] => rack_response
+          rack_response
+        in Hash => json_body
+          [200, {"Content-Type" => "application/json"}, [JSON.generate(json_body)]]
         else
           [200, {"Content-Type" => "application/json"}, [JSON.generate({"message" => "success"})]]
         end
@@ -78,9 +90,9 @@ module TeBot
         end
       end
 
-      ::TeBot::Message::GENERAL_MESSAGE_TYPES.each do |f|
-        message.public_send(f) do
-          handler = self.class.public_send(f)
+      ::TeBot::Message::GENERAL_MESSAGE_TYPES.each do |message_type|
+        message.public_send(message_type) do
+          handler = self.class.message_handlers(message_type)
 
           next unless handler.respond_to?(:call)
           handler.call(conn)

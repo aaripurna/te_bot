@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Self-contaned telegram bot handler."
   spec.description = "All at one telegram bot."
   spec.homepage = "https://github.com/aaripurna/te_bot"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 2.7.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/aaripurna/te_bot"

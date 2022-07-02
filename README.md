@@ -10,7 +10,7 @@ This gem is used to handle telegram webhook and sending message with telegram bo
 
 Install the gem and add to the application's Gemfile
 
-    gem 'te_bot', '~> 0.2.0'
+    gem 'te_bot', '~> 0.3.0'
 
 Then run
 
@@ -89,7 +89,7 @@ class MyWebhookApp < TeBot::Court
   end
 end
 ```
-And also we can define a macro for defaul action `#default_action` if the request does not match with this [Documentation](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates), Or we have not create the handler for that specific message type.
+And also we can define a macro for default action `#default_action` if the request does not match with this [Documentation](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates), Or we have not created the handler for that specific message type.
 
 ```rb
 # app.rb
@@ -100,7 +100,7 @@ class MyWebhookApp < TeBot::Court
   end
 end
 ```
-Since this app implements rack interface, and railr is also a rack based application. We can mount this app direcly inside rails app.
+Since this app implements rack interface, and rails is also a rack based application. We can mount this app direcly inside rails app.
 
 ```rb
 # config/routes.rb
@@ -114,8 +114,8 @@ end
 
 ### Sending Message to Telegram
 To send message direcly to telegram, we can use this module `TeBot::Wire`
-and need to require `"te_bot/sender_options"` to add default handler for different type of message.
-Available message types are `:text`, `:markdown`, `:photo`, `:audio`, `:document`, `:video`, `:animation`, `:voice`
+and need to require `"te_bot/sender_options"` to add default handler for different type of messages.
+Available message types are `:text`, `:markdown`, `:photo`, `:audio`, `:document`, `:video`, `:animation` amd `:voice`
 
 Some supported message by default:
 ```rb
@@ -135,7 +135,7 @@ sender.send_message(chat_id, animation: { animation: url, caption: caption})
 For markdown telegram supports MArkdownV2 [refer to this](https://core.telegram.org/bots/api#markdownv2-style)
 Please check the [documentation](https://core.telegram.org/bots/api#sendmessage) for more details.
 
-Of course you add more handler by extending the `TeBot::Wire` class
+Of course you can add more handler by extending the `TeBot::Wire` class
 
 ```ruby
 # in/your/custom_handler.rb
