@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    te_bot (0.1.0)
+    te_bot (0.2.0)
       faraday (~> 2.3)
       rack (~> 2.2)
 
