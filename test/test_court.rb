@@ -7,6 +7,12 @@ require "json"
 class TestCourt < Minitest::Test
   include Rack::Test::Methods
 
+  ::TeBot::Wire.class_eval do
+    sender :plain do |conn, chat_id, message|
+      conn.make_request("sendMessage", params: {chat_id: chat_id, text: message})
+    end
+  end
+
   def setup
     stub_request(:post, "https://api.telegram.org/bot5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A/sendMessage?chat_id=5093621143&text=This IS Bot")
       .with(
@@ -47,16 +53,16 @@ class TestCourt < Minitest::Test
     access_token "5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A"
     attr_reader :boo
 
-    command("/start limit:10 not:10") do |params, message|
-      params
+    command("/start") do |conn|
+      [200, {"Content-Type" => "json"}, [JSON.generate(conn.params)]]
     end
 
-    command("/boo") do |conn, params|
+    command("/boo") do |conn|
       talk_back(conn)
     end
 
-    command("/foo") do |conn, params|
-      reply(conn, "This IS Bot")
+    command("/foo") do |conn|
+      conn.reply plain: "This IS Bot"
     end
 
     class << self
@@ -98,11 +104,12 @@ class TestCourt < Minitest::Test
           first_name: "Test",
           username: "Test"
         },
-        text: "/start"
+        text: "/start limit:20 order:desc"
       }
     }), {"CONTENT_TYPE" => "application/json"}
 
     assert_equal response.status, 200
+    assert_equal({"limit" => "20", "order" => "desc"}, JSON.parse(response.body))
   end
 
   def test_it_fallback_to_caller_method

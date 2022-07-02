@@ -10,7 +10,7 @@ This gem is used to handle telegram webhook and sending message with telegram bo
 
 Install the gem and add to the application's Gemfile
 
-    gem 'te_bot', '~> 0.1.0'
+    gem 'te_bot', '~> 0.2.0'
 
 Then run
 
@@ -28,16 +28,17 @@ This gem can be used as a standalone app since it implement rack interface. To u
 # app.rb
 
 require "te_bot"
+require "te_bot/sender_options"
 
 class MyWebhookApp < TeBot::Court
   access_token ENV["YOUR_BOT_ACCESS_TOKEN"]
     
-  command("/start") do |conn, params|
-    reply(conn, "Welcome aboard my friend!")
+  command("/start") do |conn|
+    conn.reply text: "Welcome aboard my friend!"
   end
     
-  command("/today") do |conn, params|
-    reply(conn, Time.now.to_s)
+  command("/today") do |conn|
+    conn.reply text: Time.now.to_s
   end
 end
 ```
@@ -62,7 +63,7 @@ To run the app we can use rackup
 For more detailed information about rack please visit [Rack Repository](https://github.com/rack/rack).
 
 Now, our `MyWebhookApp` class is ready to handle some commands from telegram bot which are `/start` and `/today`.
-The command aslo support argument that will be passed to the `#command` block as `params`. To pass arguments, we can simply type `/today city:Jakarta limit:10`. The argument will be parsed as a Hash with string key => `{"city" => "Jakarta", "limit" => "10"}`. While the parameter `conn` is the message object which contains the full message including the chat_id to repy to.
+The command aslo support argument that will be passed to the `#command` block as `conn.params`. To pass arguments, we can simply type `/today city:Jakarta limit:10`. The argument will be parsed as a Hash with string key => `{"city" => "Jakarta", "limit" => "10"}`. While the parameter `conn` is the message object which contains the full message including the chat_id to repy to.
 
 To add a default handler for non existing command we can use the `#default_command` macro.
 
@@ -70,8 +71,8 @@ To add a default handler for non existing command we can use the `#default_comma
 # app.rb
 
 class MyWebhookApp < TeBot::Court
-  default_command do |conn, params|
-    reply(conn, "Sorry, Comand not found. Try another command. or type /help")
+  default_command do |conn|
+    conn.reply text: "Sorry, Comand not found. Try another command. or type /help"
   end
 end
 ```
@@ -84,18 +85,18 @@ Other type of messages are also supported by using this macros `text` for regula
 class MyWebhookApp < TeBot::Court
   text do |conn|
     message = do_some_fancy_stuff_here(conn)
-    reply(conn, message)
+    conn.reply text: message
   end
 end
 ```
-And also we can define a macro for defaul action `#default_action` if the request does not match with this [Documentation](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates), Or we have not create the handler for that specific message type. Just becarefull, the `conn.data` might returns nil if the message format doesnot match the documentation.
+And also we can define a macro for defaul action `#default_action` if the request does not match with this [Documentation](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates), Or we have not create the handler for that specific message type.
 
 ```rb
 # app.rb
 
 class MyWebhookApp < TeBot::Court
   default_action do |conn|
-    reply(conn, "No, I can't talk like people. use command instead") if conn.data&.chat_id
+    conn.reply text: "No, I can't talk like people. use command instead"
   end
 end
 ```
@@ -113,13 +114,38 @@ end
 
 ### Sending Message to Telegram
 To send message direcly to telegram, we can use this module `TeBot::Wire`
+and need to require `"te_bot/sender_options"` to add default handler for different type of message.
+Available message types are `:text`, `:markdown`, `:photo`, `:audio`, `:document`, `:video`, `:animation`, `:voice`
 
+Some supported message by default:
 ```rb
 # app.rb
 sender = TeBot::Wire.new(ENV['YOUR_ACCESS_TOKEN_HERE'])
-sender.send_message(chat_id, message_string)
+sender.send_message(chat_id, text: message_string)
+sender.send_message(chat_id, markdown: markdown_string)
+
+sender.send_message(chat_id, photo: { photo: url, caption: caption })
+sender.send_message(chat_id, video: { video: url, caption: caption})
+sender.send_message(chat_id, document: { document: url, caption: caption})
+sender.send_message(chat_id, audio: { audio: url, caption: caption})
+sender.send_message(chat_id, animation: { animation: url, caption: caption})
+
 ```
-This gem only support [sendMessage](https://core.telegram.org/bots/api#sendmessage) API for this moment.
+
+For markdown telegram supports MArkdownV2 [refer to this](https://core.telegram.org/bots/api#markdownv2-style)
+Please check the [documentation](https://core.telegram.org/bots/api#sendmessage) for more details.
+
+Of course you add more handler by extending the `TeBot::Wire` class
+
+```ruby
+# in/your/custom_handler.rb
+
+TeBot::Wire.class_eval do
+  sender :json do |conn, chat_id, message|
+    conn.make_request("sendMessage", body: { chat_id: chat_id, json: message }.to_json)
+  end
+end
+```
 
 ## Development
 

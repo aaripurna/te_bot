@@ -29,7 +29,7 @@ class TestGeneralMessage < Minitest::Test
     end
 
     text do |conn|
-      [200, {"Contet-Type" => "application/json"}, [%({"Hello": "#{conn.data.content.parse}"})]]
+      [200, {"Contet-Type" => "application/json"}, [%({"Hello": "#{conn.message.data.content.parse}"})]]
     end
 
     default_action do |message|

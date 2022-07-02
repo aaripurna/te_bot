@@ -20,14 +20,6 @@ module TeBot
         @default_action ||= block
       end
 
-      def reply(conn, message)
-        send_message(conn.data&.chat_id, message)
-      end
-
-      def send_message(chat_id, message)
-        wire.send_message(chat_id, message)
-      end
-
       def command(text, &block)
         @commands ||= {}
         @commands[text] = block
@@ -74,14 +66,15 @@ module TeBot
     def handle_request(body)
       message = ::TeBot::Message.new(body)
 
-      message.command do
-        command, params = message.data.content.parse
-        handler = self.class.commands[command]
+      command, params = message.data&.content&.parse
+      conn = ::TeBot::Cable.new(self.class.wire, message, params || {})
 
+      message.command do
+        handler = self.class.commands[command]
         if handler.respond_to?(:call)
-          handler.call(message, params)
+          handler.call(conn)
         elsif self.class.default_command.respond_to?(:call)
-          self.class.default_command.call(message, params)
+          self.class.default_command.call(conn)
         end
       end
 
@@ -90,14 +83,14 @@ module TeBot
           handler = self.class.public_send(f)
 
           next unless handler.respond_to?(:call)
-          handler.call(message)
+          handler.call(conn)
         end
       end
 
       if message.handler.respond_to?(:call)
         message.call
       elsif self.class.default_action.respond_to?(:call)
-        self.class.default_action.call(message)
+        self.class.default_action.call(conn)
       end
     end
   end
