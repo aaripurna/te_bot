@@ -79,10 +79,9 @@ class TestCourt < Minitest::Test
       send_some_help(conn)
     end
 
-
     helpers do
       def send_some_help(conn)
-        { "call" => "The an ambulance, but not for me!" }
+        {"call" => "The an ambulance, but not for me!"}
       end
     end
   end
@@ -226,6 +225,6 @@ class TestCourt < Minitest::Test
     }), {"CONTENT_TYPE" => "application/json"}
 
     assert_equal response.status, 200
-    assert_equal({"call"=>"The an ambulance, but not for me!"}, JSON.parse(response.body))
+    assert_equal({"call" => "The an ambulance, but not for me!"}, JSON.parse(response.body))
   end
 end
