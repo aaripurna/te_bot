@@ -74,6 +74,17 @@ class TestCourt < Minitest::Test
         @boo = :boo
       end
     end
+
+    command("/helpme") do |conn|
+      send_some_help(conn)
+    end
+
+
+    helpers do
+      def send_some_help(conn)
+        { "call" => "The an ambulance, but not for me!" }
+      end
+    end
   end
 
   BOO = Class.new(::TeBot::Court) do
@@ -190,5 +201,31 @@ class TestCourt < Minitest::Test
 
     assert_equal response.status, 200
     assert_equal({"the_cow" => "Says moo"}, JSON.parse(response.body))
+  end
+
+  def test_it_allows_adding_helper_method
+    response = post "/", JSON.generate({
+      update_id: 10000,
+      message: {
+        date: 1441645532,
+        chat: {
+          last_name: "Test Lastname",
+          id: 5093621143,
+          first_name: "Test",
+          username: "Test"
+        },
+        message_id: 1365,
+        from: {
+          last_name: "Test Lastname",
+          id: 5093621143,
+          first_name: "Test",
+          username: "Test"
+        },
+        text: "/helpme"
+      }
+    }), {"CONTENT_TYPE" => "application/json"}
+
+    assert_equal response.status, 200
+    assert_equal({"call"=>"The an ambulance, but not for me!"}, JSON.parse(response.body))
   end
 end

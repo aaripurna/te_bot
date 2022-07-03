@@ -10,7 +10,7 @@ This gem is used to handle telegram webhook and sending message with telegram bo
 
 Install the gem and add to the application's Gemfile
 
-    gem 'te_bot', '~> 0.3.0'
+    gem 'te_bot'
 
 Then run
 
@@ -132,8 +132,10 @@ sender.send_message(chat_id, animation: { animation: url, caption: caption})
 
 ```
 
-For markdown telegram supports MArkdownV2 [refer to this](https://core.telegram.org/bots/api#markdownv2-style)
+For markdown telegram supports MarkdownV2 [refer to this](https://core.telegram.org/bots/api#markdownv2-style)
 Please check the [documentation](https://core.telegram.org/bots/api#sendmessage) for more details.
+
+### Custom Handler
 
 Of course you can add more handler by extending the `TeBot::Wire` class
 
@@ -143,6 +145,65 @@ Of course you can add more handler by extending the `TeBot::Wire` class
 TeBot::Wire.class_eval do
   sender :json do |conn, chat_id, message|
     conn.make_request("sendMessage", body: { chat_id: chat_id, json: message }.to_json)
+  end
+end
+```
+
+### Helpers
+If you want to add a complex logic, you can make it into a separate methods by defining class methods or using the `helpers` macro.
+You can also create a module then extend it in your main class
+
+Using module
+```ruby
+# request_helpers.rb
+
+module RequestHelpers
+  def get_nearest_hospitals(conn)
+    # do some fancy stuff
+  end
+
+  def get_the_nearest_routes(hospitals)
+    # do some even fancier stuff
+  end 
+
+  def render_markdown(routes)
+    # do something else
+  end
+end
+
+class MyWebhookApp < TeBot::Court
+  extend RequestHelpers
+
+  #... the rest of the code
+end
+
+```
+
+Using helpers macro
+```ruby
+
+# app.rb
+
+class MyWebhookApp < TeBot::Court
+  command("/findhospital") do |conn|
+    hospitals = get_nearest_hospitals(conn)
+    routes = get_the_nearest_routes(hospitals)
+
+    conn.reply markdown: render_markdown(routes)
+  end
+
+  helpers do
+    def get_nearest_hospitals(conn)
+      # do some fancy stuff
+    end
+
+    def get_the_nearest_routes(hospitals)
+      # do some even fancier stuff
+    end 
+
+    def render_markdown(routes)
+      # do something else
+    end
   end
 end
 ```

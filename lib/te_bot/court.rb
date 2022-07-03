@@ -41,6 +41,10 @@ module TeBot
         @message_handlers ||= {}
         @message_handlers[handler]
       end
+
+      def helpers(&block)
+        instance_eval(&block)
+      end
     end
 
     def call(env)
