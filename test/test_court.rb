@@ -8,8 +8,8 @@ class TestCourt < Minitest::Test
   include Rack::Test::Methods
 
   ::TeBot::Wire.class_eval do
-    sender :plain do |conn, chat_id, message|
-      conn.make_request("sendMessage", params: {chat_id: chat_id, text: message})
+    sender :plain do |chat_id, message|
+      make_request("sendMessage", params: {chat_id: chat_id, text: message})
     end
   end
 
@@ -21,7 +21,7 @@ class TestCourt < Minitest::Test
           "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
           "Content-Length" => "0",
           "Content-Type" => "application/json",
-          "User-Agent" => "Faraday v2.3.0"
+          "User-Agent" => "Faraday v2.5.2"
         }
       )
       .to_return(status: 200, body: %(
@@ -53,26 +53,32 @@ class TestCourt < Minitest::Test
     access_token "5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A"
     attr_reader :boo
 
-    command("/start") do |conn|
-      [200, {"Content-Type" => "json"}, [JSON.generate(conn.params)]]
+    command("/start") do
+      [200, {"Content-Type" => "json"}, [JSON.generate(params)]]
     end
 
-    command("/bar") do |conn|
+    command("/bar") do
       {the_cow: "Says moo"}
     end
 
-    command("/boo") do |conn|
-      talk_back(conn)
+    command("/boo") do
+      talk_back
     end
 
-    command("/foo") do |conn|
-      conn.reply plain: "This IS Bot"
+    command("/foo") do
+      reply plain: "This IS Bot"
     end
 
-    class << self
-      def talk_back(message)
-        @boo = :boo
-      end
+    def talk_back
+      @boo = :boo
+    end
+
+    command("/helpme") do
+      send_some_help
+    end
+
+    def send_some_help
+      {"call" => "The an ambulance, but not for me!"}
     end
   end
 
@@ -190,5 +196,31 @@ class TestCourt < Minitest::Test
 
     assert_equal response.status, 200
     assert_equal({"the_cow" => "Says moo"}, JSON.parse(response.body))
+  end
+
+  def test_it_allows_adding_helper_method
+    response = post "/", JSON.generate({
+      update_id: 10000,
+      message: {
+        date: 1441645532,
+        chat: {
+          last_name: "Test Lastname",
+          id: 5093621143,
+          first_name: "Test",
+          username: "Test"
+        },
+        message_id: 1365,
+        from: {
+          last_name: "Test Lastname",
+          id: 5093621143,
+          first_name: "Test",
+          username: "Test"
+        },
+        text: "/helpme"
+      }
+    }), {"CONTENT_TYPE" => "application/json"}
+
+    assert_equal response.status, 200
+    assert_equal({"call" => "The an ambulance, but not for me!"}, JSON.parse(response.body))
   end
 end

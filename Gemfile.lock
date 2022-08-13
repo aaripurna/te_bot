@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    te_bot (0.3.0)
+    te_bot (0.4.0)
       faraday (~> 2.3)
       rack (~> 2.2)
 
@@ -14,10 +14,10 @@ GEM
     byebug (11.1.3)
     crack (0.4.5)
       rexml
-    faraday (2.3.0)
-      faraday-net_http (~> 2.0)
+    faraday (2.5.2)
+      faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
-    faraday-net_http (2.0.3)
+    faraday-net_http (3.0.0)
     hashdiff (1.0.1)
     minitest (5.16.1)
     parallel (1.22.1)

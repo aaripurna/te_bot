@@ -12,7 +12,7 @@ class TestCable < Minitest::Test
           "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
           "Content-Length" => "0",
           "Content-Type" => "application/json",
-          "User-Agent" => "Faraday v2.3.0"
+          "User-Agent" => "Faraday v2.5.2"
         }
       )
       .to_return(status: 200, body: %(
@@ -41,8 +41,8 @@ class TestCable < Minitest::Test
   end
 
   ::TeBot::Wire.class_eval do
-    sender :plain_text do |conn, chat_id, message|
-      conn.make_request("sendMessage", params: {chat_id: chat_id, text: message})
+    sender :plain_text do |chat_id, message|
+      make_request("sendMessage", params: {chat_id: chat_id, text: message})
     end
   end
 
@@ -58,9 +58,19 @@ class TestCable < Minitest::Test
     end
   end
 
+  Court = Class.new do
+    include ::TeBot::Cable
+    attr_reader :wire, :message
+
+    def initialize(wire, message)
+      @wire = wire
+      @message = message
+    end
+  end
+
   def test_reply
     wire = ::TeBot::Wire.new(ACCESS_TOKEN)
-    service = ::TeBot::Cable.new(wire, Message.new)
+    service = Court.new(wire, Message.new)
 
     response = service.reply plain_text: "This IS Bot"
 

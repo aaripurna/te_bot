@@ -10,7 +10,7 @@ This gem is used to handle telegram webhook and sending message with telegram bo
 
 Install the gem and add to the application's Gemfile
 
-    gem 'te_bot', '~> 0.3.0'
+    gem 'te_bot'
 
 Then run
 
@@ -33,12 +33,12 @@ require "te_bot/sender_options"
 class MyWebhookApp < TeBot::Court
   access_token ENV["YOUR_BOT_ACCESS_TOKEN"]
     
-  command("/start") do |conn|
-    conn.reply text: "Welcome aboard my friend!"
+  command("/start") do
+    reply text: "Welcome aboard my friend!"
   end
     
   command("/today") do |conn|
-    conn.reply text: Time.now.to_s
+    reply text: Time.now.to_s
   end
 end
 ```
@@ -63,7 +63,7 @@ To run the app we can use rackup
 For more detailed information about rack please visit [Rack Repository](https://github.com/rack/rack).
 
 Now, our `MyWebhookApp` class is ready to handle some commands from telegram bot which are `/start` and `/today`.
-The command aslo support argument that will be passed to the `#command` block as `conn.params`. To pass arguments, we can simply type `/today city:Jakarta limit:10`. The argument will be parsed as a Hash with string key => `{"city" => "Jakarta", "limit" => "10"}`. While the parameter `conn` is the message object which contains the full message including the chat_id to repy to.
+The command aslo support argument that will be passed in the instance method `params`. To pass arguments, we can simply type `/today city:Jakarta limit:10`. The argument will be parsed as a Hash with string key => `{"city" => "Jakarta", "limit" => "10"}`. While the parameter `conn` is the message object which contains the full message including the chat_id to repy to.
 
 To add a default handler for non existing command we can use the `#default_command` macro.
 
@@ -71,21 +71,23 @@ To add a default handler for non existing command we can use the `#default_comma
 # app.rb
 
 class MyWebhookApp < TeBot::Court
-  default_command do |conn|
-    conn.reply text: "Sorry, Comand not found. Try another command. or type /help"
+  default_command do
+    reply text: "Sorry, Comand not found. Try another command. or type /help"
   end
 end
 ```
 
-Other type of messages are also supported by using this macros `text` for regular text message, `query`, `document`, `audio`, and `voice`. For more detail please check this [Telegram Docs](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates). These macros is only expecting `conn` as an argument.
+All the messages are passed in the instance method `message`
+
+Other type of messages are also supported by using this macros `text` for regular text message, `query`, `document`, `audio`, and `voice`. For more detail please check this [Telegram Docs](https://core.telegram.org/bots/webhooks#testing-your-bot-with-updates).
 
 ```rb
 # app.rb
 
 class MyWebhookApp < TeBot::Court
-  text do |conn|
-    message = do_some_fancy_stuff_here(conn)
-    conn.reply text: message
+  text do
+    reply_message = do_some_fancy_stuff_here(message)
+    conn.reply text: reply_message
   end
 end
 ```
@@ -95,8 +97,8 @@ And also we can define a macro for default action `#default_action` if the reque
 # app.rb
 
 class MyWebhookApp < TeBot::Court
-  default_action do |conn|
-    conn.reply text: "No, I can't talk like people. use command instead"
+  default_action do
+    reply text: "No, I can't talk like people. use command instead"
   end
 end
 ```
@@ -132,8 +134,10 @@ sender.send_message(chat_id, animation: { animation: url, caption: caption})
 
 ```
 
-For markdown telegram supports MArkdownV2 [refer to this](https://core.telegram.org/bots/api#markdownv2-style)
+For markdown telegram supports MarkdownV2 [refer to this](https://core.telegram.org/bots/api#markdownv2-style)
 Please check the [documentation](https://core.telegram.org/bots/api#sendmessage) for more details.
+
+### Custom Handler
 
 Of course you can add more handler by extending the `TeBot::Wire` class
 
@@ -141,8 +145,63 @@ Of course you can add more handler by extending the `TeBot::Wire` class
 # in/your/custom_handler.rb
 
 TeBot::Wire.class_eval do
-  sender :json do |conn, chat_id, message|
-    conn.make_request("sendMessage", body: { chat_id: chat_id, json: message }.to_json)
+  sender :json do |chat_id, message|
+    make_request("sendMessage", body: { chat_id: chat_id, json: message }.to_json)
+  end
+end
+```
+
+### Helpers
+
+Using module
+```ruby
+# request_helpers.rb
+
+module RequestHelpers
+  def get_nearest_hospitals
+    # do some fancy stuff
+  end
+
+  def get_the_nearest_routes(hospitals)
+    # do some even fancier stuff
+  end 
+
+  def render_markdown(routes)
+    # do something else
+  end
+end
+
+class MyWebhookApp < TeBot::Court
+  include RequestHelpers
+
+  #... the rest of the code
+end
+
+```
+
+Using instance methods
+```ruby
+
+# app.rb
+
+class MyWebhookApp < TeBot::Court
+  command("/findhospital") do
+    hospitals = get_nearest_hospitals(params)
+    routes = get_the_nearest_routes(hospitals)
+
+    reply markdown: render_markdown(routes)
+  end
+
+  def get_nearest_hospitals(conn)
+    # do some fancy stuff
+  end
+
+  def get_the_nearest_routes(hospitals)
+    # do some even fancier stuff
+  end 
+
+  def render_markdown(routes)
+    # do something else
   end
 end
 ```

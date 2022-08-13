@@ -43,7 +43,7 @@ module TeBot
 
       raise ArgumentError, "Message type invalid. sender :#{message_format} not defined" if handler.nil?
 
-      return handler.call(self, chat_id, message) if handler.respond_to?(:call)
+      return instance_exec(chat_id, message, &handler) if handler.respond_to?(:call)
 
       public_send(handler, chat_id, message)
     end

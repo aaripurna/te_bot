@@ -12,7 +12,7 @@ class TestWire < Minitest::Test
           "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
           "Content-Length" => "0",
           "Content-Type" => "application/json",
-          "User-Agent" => "Faraday v2.3.0"
+          "User-Agent" => "Faraday v2.5.2"
         }
       )
       .to_return(status: 200, body: %(
@@ -79,8 +79,8 @@ class TestWire < Minitest::Test
   end
 
   ::TeBot::Wire.class_eval do
-    sender :foo do |conn, chat_id, message|
-      conn.make_request("sendMessage", params: {chat_id: chat_id, text: message})
+    sender :foo do |chat_id, message|
+      make_request("sendMessage", params: {chat_id: chat_id, text: message})
     end
   end
 
