@@ -79,8 +79,8 @@ class TestWire < Minitest::Test
   end
 
   ::TeBot::Wire.class_eval do
-    sender :foo do |conn, chat_id, message|
-      conn.make_request("sendMessage", params: {chat_id: chat_id, text: message})
+    sender :foo do |chat_id, message|
+      make_request("sendMessage", params: {chat_id: chat_id, text: message})
     end
   end
 

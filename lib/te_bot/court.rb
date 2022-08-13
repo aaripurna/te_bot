@@ -5,6 +5,8 @@ require "json"
 
 module TeBot
   class Court
+    include TeBot::Cable
+
     class << self
       attr_reader :wire, :commands
 
@@ -41,10 +43,15 @@ module TeBot
         @message_handlers ||= {}
         @message_handlers[handler]
       end
+    end
 
-      def helpers(&block)
-        instance_eval(&block)
-      end
+    attr_reader :params, :message, :wire
+
+    def initialize
+      @params = {}
+      @message = nil
+      @command = nil
+      @wire = self.class.wire
     end
 
     def call(env)
@@ -80,33 +87,34 @@ module TeBot
     end
 
     def handle_request(body)
-      message = ::TeBot::Message.new(body)
+      @message = ::TeBot::Message.new(body)
 
-      command, params = message.data&.content&.parse
-      conn = ::TeBot::Cable.new(self.class.wire, message, params || {})
+      @command, @params = @message.data&.content&.parse
 
-      message.command do
-        handler = self.class.commands[command]
+      @params = params
+
+      @message.command do
+        handler = self.class.commands[@command]
         if handler.respond_to?(:call)
-          handler.call(conn)
+          instance_eval(&handler)
         elsif self.class.default_command.respond_to?(:call)
-          self.class.default_command.call(conn)
+          instance_eval(&self.class.default_command)
         end
       end
 
       ::TeBot::Message::GENERAL_MESSAGE_TYPES.each do |message_type|
-        message.public_send(message_type) do
+        @message.public_send(message_type) do
           handler = self.class.message_handlers(message_type)
 
           next unless handler.respond_to?(:call)
-          handler.call(conn)
+          instance_eval(&handler)
         end
       end
 
-      if message.handler.respond_to?(:call)
-        message.call
+      if @message.handler.respond_to?(:call)
+        instance_eval(&@message.handler)
       elsif self.class.default_action.respond_to?(:call)
-        self.class.default_action.call(conn)
+        instance_eval(&self.class.default_action)
       end
     end
   end

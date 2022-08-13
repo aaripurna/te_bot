@@ -8,8 +8,8 @@ class TestCourt < Minitest::Test
   include Rack::Test::Methods
 
   ::TeBot::Wire.class_eval do
-    sender :plain do |conn, chat_id, message|
-      conn.make_request("sendMessage", params: {chat_id: chat_id, text: message})
+    sender :plain do |chat_id, message|
+      make_request("sendMessage", params: {chat_id: chat_id, text: message})
     end
   end
 
@@ -53,36 +53,32 @@ class TestCourt < Minitest::Test
     access_token "5549790826:OPKJJAx8gNWN7kWt4hUWCrT-_YGk0B35j2A"
     attr_reader :boo
 
-    command("/start") do |conn|
-      [200, {"Content-Type" => "json"}, [JSON.generate(conn.params)]]
+    command("/start") do
+      [200, {"Content-Type" => "json"}, [JSON.generate(params)]]
     end
 
-    command("/bar") do |conn|
+    command("/bar") do
       {the_cow: "Says moo"}
     end
 
-    command("/boo") do |conn|
-      talk_back(conn)
+    command("/boo") do
+      talk_back
     end
 
-    command("/foo") do |conn|
-      conn.reply plain: "This IS Bot"
+    command("/foo") do
+      reply plain: "This IS Bot"
     end
 
-    class << self
-      def talk_back(message)
-        @boo = :boo
-      end
+    def talk_back
+      @boo = :boo
     end
 
-    command("/helpme") do |conn|
-      send_some_help(conn)
+    command("/helpme") do
+      send_some_help
     end
 
-    helpers do
-      def send_some_help(conn)
-        {"call" => "The an ambulance, but not for me!"}
-      end
+    def send_some_help
+      {"call" => "The an ambulance, but not for me!"}
     end
   end
 
