@@ -37,7 +37,7 @@ class MyWebhookApp < TeBot::Court
     reply text: "Welcome aboard my friend!"
   end
     
-  command("/today") do |conn|
+  command("/today") do
     reply text: Time.now.to_s
   end
 end
@@ -63,7 +63,7 @@ To run the app we can use rackup
 For more detailed information about rack please visit [Rack Repository](https://github.com/rack/rack).
 
 Now, our `MyWebhookApp` class is ready to handle some commands from telegram bot which are `/start` and `/today`.
-The command aslo support argument that will be passed in the instance method `params`. To pass arguments, we can simply type `/today city:Jakarta limit:10`. The argument will be parsed as a Hash with string key => `{"city" => "Jakarta", "limit" => "10"}`. While the parameter `conn` is the message object which contains the full message including the chat_id to repy to.
+The command aslo support argument that will be passed in the instance method `params`. To pass arguments, we can simply type `/today city:Jakarta limit:10`. The argument will be parsed as a Hash with string key => `{"city" => "Jakarta", "limit" => "10"}`.
 
 To add a default handler for non existing command we can use the `#default_command` macro.
 
@@ -87,7 +87,7 @@ Other type of messages are also supported by using this macros `text` for regula
 class MyWebhookApp < TeBot::Court
   text do
     reply_message = do_some_fancy_stuff_here(message)
-    conn.reply text: reply_message
+    reply text: reply_message
   end
 end
 ```
@@ -192,7 +192,7 @@ class MyWebhookApp < TeBot::Court
     reply markdown: render_markdown(routes)
   end
 
-  def get_nearest_hospitals(conn)
+  def get_nearest_hospitals(data)
     # do some fancy stuff
   end
 
